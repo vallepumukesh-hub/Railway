@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RailConnect India — Smart Railway Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- BACKGROUND LAYERS -->
+<div class="bg-layer"></div>
+<div class="track-lines"></div>
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🚆</div>
+    Rail<span>Connect</span>
+  </div>
+  <ul>
+    <li><a href="#" onclick="go('home')">Home</a></li>
+    <li><a href="#" onclick="go('pnr')">PNR Status</a></li>
+    <li><a href="#" onclick="go('offers')">Offers</a></li>
+    <li><a href="#" onclick="go('help')">Help</a></li>
+  </ul>
+  <button class="nav-btn" onclick="go('login')">Login / Sign Up</button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════ -->
+<div id="home" class="screen active page">
+  <div class="hero">
+    <div class="hero-badge">🇮🇳 Indian Railway Booking Platform</div>
+    <h1>Travel Smart,<br>Travel <em>Faster</em></h1>
+    <p>Book train tickets instantly across 8,000+ stations. Real-time seat availability, PNR tracking, and exclusive offers.</p>
+
+    <!-- SEARCH BOX -->
+    <div class="search-box">
+      <div class="search-tabs">
+        <button class="tab active" onclick="setTab(this,'one-way')">One Way</button>
+        <button class="tab" onclick="setTab(this,'round')">Round Trip</button>
+        <button class="tab" onclick="setTab(this,'multi')">Multi-city</button>
+      </div>
+      <div class="search-row">
+        <div class="from-to">
+          <div class="field">
+            <label>From</label>
+            <input id="fromCity" placeholder="New Delhi (NDLS)" list="stations" />
+          </div>
+          <button class="swap-btn" onclick="swapStations()" title="Swap">⇄</button>
+          <div class="field">
+            <label>To</label>
+            <input id="toCity" placeholder="Mumbai CST (CSMT)" list="stations" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Journey Date</label>
+          <input type="date" id="journeyDate" />
+        </div>
+        <div class="field">
+          <label>Class</label>
+          <select id="travelClass">
+            <option value="SL">Sleeper (SL)</option>
+            <option value="3A">AC 3 Tier (3A)</option>
+            <option value="2A">AC 2 Tier (2A)</option>
+            <option value="1A">AC 1st Class (1A)</option>
+            <option value="CC">Chair Car (CC)</option>
+            <option value="2S">Second Sitting (2S)</option>
+          </select>
+        </div>
+        <button class="search-btn" onclick="searchTrains()">🔍 Search Trains</button>
+      </div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="quick-links">
+      <div class="quick-card" onclick="go('pnr')">
+        <div class="quick-icon">🎟️</div>
+        <div class="quick-label">PNR Status</div>
+      </div>
+      <div class="quick-card" onclick="showToast('Seat availability loaded')">
+        <div class="quick-icon">💺</div>
+        <div class="quick-label">Seat Availability</div>
+      </div>
+      <div class="quick-card" onclick="showToast('Timetable opening...')">
+        <div class="quick-icon">📅</div>
+        <div class="quick-label">Train Schedule</div>
+      </div>
+      <div class="quick-card" onclick="go('offers')">
+        <div class="quick-icon">🎁</div>
+        <div class="quick-label">Offers</div>
+      </div>
+      <div class="quick-card" onclick="showToast('Cancellation policy opened')">
+        <div class="quick-icon">↩️</div>
+        <div class="quick-label">Cancellation</div>
+      </div>
+      <div class="quick-card" onclick="go('help')">
+        <div class="quick-icon">🆘</div>
+        <div class="quick-label">Help & Support</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAIN RESULTS (shown after search) -->
+  <div id="trainResults" style="display:none">
+    <div class="section-header">
+      <div>
+        <div class="section-title" id="resultsTitle">Trains Found</div>
+        <div class="section-meta" id="resultsDate"></div>
+      </div>
+      <div class="section-meta" id="resultsCount"></div>
+    </div>
+    <div class="trains-grid" id="trainsList"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PNR STATUS SCREEN
+══════════════════════════════════════ -->
+<div id="pnr" class="screen page">
+  <button class="back-btn" onclick="go('home')">← Back to Home</button>
+  <div class="pnr-screen">
+    <div class="pnr-card">
+      <h2>🎟 PNR Status</h2>
+      <p>Enter your 10-digit PNR number to check booking status, seat details, and train running info.</p>
+      <div class="pnr-input-row">
+        <input class="pnr-input" id="pnrInput" placeholder="Enter PNR number" maxlength="10" />
+        <button class="pnr-btn" onclick="checkPNR()">Check Status</button>
+      </div>
+      <div class="pnr-result" id="pnrResult">
+        <div class="status-badge">✅ Confirmed</div>
+        <div class="pnr-details">
+          <div class="detail-item"><label>Train</label><span id="pr-train">Rajdhani Express (12952)</span></div>
+          <div class="detail-item"><label>Journey Date</label><span id="pr-date">22 Mar 2026</span></div>
+          <div class="detail-item"><label>From → To</label><span id="pr-route">NDLS → CSMT</span></div>
+          <div class="detail-item"><label>Class</label><span id="pr-class">AC 2 Tier (2A)</span></div>
+          <div class="detail-item"><label>Departure</label><span id="pr-dep">16:55</span></div>
+          <div class="detail-item"><label>Arrival</label><span id="pr-arr">08:35 (+1)</span></div>
+        </div>
+        <div class="passenger-list">
+          <h4>Passenger Details</h4>
+          <div class="passenger-row">
+            <span>Passenger 1 — Adult</span>
+            <span class="seat-tag">S3 · Berth 24 · LB</span>
+          </div>
+          <div class="passenger-row">
+            <span>Passenger 2 — Adult</span>
+            <span class="seat-tag">S3 · Berth 25 · UB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     OFFERS SCREEN
+══════════════════════════════════════ -->
+<div id="offers" class="screen page">
+  <button class="back-btn" onclick="go('home')">← Back to Home</button>
+  <div style="padding: 30px 40px 10px;">
+    <div class="hero-badge" style="margin:0 0 14px">🔥 Limited Time Deals</div>
+    <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;margin-bottom:6px">Exclusive Offers</div>
+    <p style="color:var(--muted)">Save big on your next journey with these special discounts.</p>
+  </div>
+  <div class="offers-grid">
+    <div class="offer-card offer-1">
+      <button class="copy-btn" onclick="copyCode('RAIL20')">Copy Code</button>
+      <div class="offer-discount" style="color:var(--teal)">20% OFF</div>
+      <div class="offer-title">Early Bird Discount</div>
+      <div class="offer-desc">Book 30 days in advance and save 20% on AC classes. Valid on Rajdhani, Shatabdi & Duronto trains.</div>
+      <div class="offer-code">RAIL20</div>
+      <div class="offer-valid">Valid till 31 Dec 2026 · Max discount ₹500</div>
+    </div>
+    <div class="offer-card offer-2">
+      <button class="copy-btn" onclick="copyCode('STUDENT15')">Copy Code</button>
+      <div class="offer-discount" style="color:var(--gold)">15% OFF</div>
+      <div class="offer-title">Student Special</div>
+      <div class="offer-desc">Exclusive discount for students with valid ID. Applicable on Sleeper and 3AC classes nationwide.</div>
+      <div class="offer-code">STUDENT15</div>
+      <div class="offer-valid">Valid ID required · No expiry</div>
+    </div>
+    <div class="offer-card offer-3">
+      <button class="copy-btn" onclick="copyCode('SENIOR10')">Copy Code</button>
+      <div class="offer-discount" style="color:#a8e6cf">10% OFF</div>
+      <div class="offer-title">Senior Citizen Fare</div>
+      <div class="offer-desc">Additional 10% off for citizens above 60 years. Available on all train categories and classes.</div>
+      <div class="offer-code">SENIOR10</div>
+      <div class="offer-valid">Valid for age 60+ · No expiry</div>
+    </div>
+    <div class="offer-card offer-4">
+      <button class="copy-btn" onclick="copyCode('UPIFAST')">Copy Code</button>
+      <div class="offer-discount" style="color:#c8b4ff">₹75 OFF</div>
+      <div class="offer-title">UPI Cashback</div>
+      <div class="offer-desc">Get ₹75 cashback on your first UPI payment. Works with PhonePe, GPay, Paytm and all UPI apps.</div>
+      <div class="offer-code">UPIFAST</div>
+      <div class="offer-valid">First transaction only · Min ₹300</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HELP SCREEN
+══════════════════════════════════════ -->
+<div id="help" class="screen page">
+  <button class="back-btn" onclick="go('home')">← Back to Home</button>
+  <div class="help-container">
+    <h2>Help & Support</h2>
+    <p>We're here 24×7. Reach us through any channel below.</p>
+    <div class="help-grid">
+      <div class="help-card">
+        <div class="help-icon">📞</div>
+        <h3>Call Us</h3>
+        <p>Our support team is available around the clock for all booking and travel queries.</p>
+        <div class="contact-info">1800-111-139 (Toll Free)</div>
+        <div class="contact-info" style="color:var(--muted);font-size:12px;margin-top:4px">139 (Railway Enquiry)</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">📧</div>
+        <h3>Email Support</h3>
+        <p>Send us a detailed query and expect a response within 4 business hours.</p>
+        <div class="contact-info">support@railconnect.in</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">💬</div>
+        <h3>Live Chat</h3>
+        <p>Chat instantly with an agent or our AI assistant for quick answers.</p>
+        <div class="contact-info" style="cursor:pointer" onclick="showToast('Live chat coming soon!')">Start Live Chat →</div>
+      </div>
+      <div class="help-card">
+        <div class="help-icon">🏢</div>
+        <h3>Nearest Station</h3>
+        <p>Visit the railway helpdesk at your nearest station for in-person assistance.</p>
+        <div class="contact-info" style="cursor:pointer" onclick="showToast('Station locator loading...')">Find Stations →</div>
+      </div>
+    </div>
+    <div class="faq-section">
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">How do I cancel my ticket? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Log in, go to "My Bookings", select the ticket and click "Cancel". Refunds are processed within 5–7 business days to the original payment method. Cancellation charges apply per IRCTC policy.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">What is the tatkal booking window? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Tatkal quota opens at 10:00 AM one day before the journey for AC classes and 11:00 AM for non-AC classes. An additional tatkal charge is applicable.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">Can I modify my travel date after booking? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">Modification is currently not available. You will need to cancel the existing ticket (charges apply) and rebook for the new date.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">How do I download my e-ticket? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">After booking, your e-ticket is emailed automatically. You can also download it from "My Bookings" section. A valid photo ID is required at the time of travel.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFAQ(this)">Is it safe to travel with a Waitlisted (WL) ticket? <span class="faq-arrow">▾</span></div>
+        <div class="faq-a">If your WL ticket does not confirm before the chart preparation (usually 4 hours before departure), it is auto-cancelled and refunded. You cannot board the train with a WL ticket.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     LOGIN / SIGNUP SCREEN
+══════════════════════════════════════ -->
+<div id="login" class="screen page">
+  <div class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon">🚆</div>
+        <h2>RailConnect</h2>
+        <p>Access your bookings and travel history</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuth('login-form', this)">Login</button>
+        <button class="auth-tab" onclick="switchAuth('signup-form', this)">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label>Mobile Number or Email</label>
+          <input type="text" id="loginUser" placeholder="Enter mobile / email" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="Enter your password" />
+        </div>
+        <div class="remember-row">
+          <label class="check-label"><input type="checkbox"> Remember me</label>
+          <a href="#" class="forgot" onclick="showToast('OTP sent to your mobile')">Forgot Password?</a>
+        </div>
+        <button class="submit-btn" onclick="doLogin()">Login Securely →</button>
+        <div class="divider"><span>or continue with</span></div>
+        <div class="social-btns">
+          <button class="social-btn" onclick="showToast('Google login coming soon')">🔴 Google</button>
+          <button class="social-btn" onclick="showToast('OTP sent to mobile')">📱 Mobile OTP</button>
+        </div>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signup-form" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="signFirst" placeholder="First name" /></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="signLast" placeholder="Last name" /></div>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="signMobile" placeholder="+91 XXXXX XXXXX" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="signEmail" placeholder="your@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Create Password</label>
+          <input type="password" id="signPass" placeholder="Min 8 characters" />
+        </div>
+        <div class="remember-row">
+          <label class="check-label"><input type="checkbox" id="termsCheck"> I agree to Terms & Privacy Policy</label>
+        </div>
+        <button class="submit-btn" onclick="doSignup()">Create Account →</button>
+      </div>
+
+      <!-- Success State -->
+      <div class="success-msg" id="authSuccess">
+        <div class="success-icon">🎉</div>
+        <h3 id="successTitle">Welcome Back!</h3>
+        <p id="successSub">You're now logged into RailConnect. Happy Travels!</p>
+        <button class="submit-btn" style="margin-top:20px" onclick="go('home')">Go to Home →</button>
+      </div>
+
+      <div style="margin-top:18px">
+        <button class="back-btn" style="margin:0" onclick="go('home')">← Back to Home</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     BOOKING MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div id="bookingFlow">
+      <div class="modal-header">
+        <h3>Book Ticket</h3>
+        <button class="close-modal" onclick="closeModal()">✕</button>
+      </div>
+      <div class="step-indicator">
+        <div class="step active" id="step1">1</div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2">2</div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3">3</div>
+      </div>
+      <div class="journey-summary" id="modalSummary">
+        <div class="time-block">
+          <div class="j-time" id="mdDep">—</div>
+          <div class="j-station" id="mdFrom">—</div>
+          <div class="j-meta" id="mdDate">—</div>
+        </div>
+        <div class="j-arrow">→</div>
+        <div class="time-block">
+          <div class="j-time" id="mdArr">—</div>
+          <div class="j-station" id="mdTo">—</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--muted)" id="mdTrain">—</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gold)" id="mdClass">—</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Passengers -->
+      <div id="step-1-content">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Passenger Details</div>
+        <div class="pass-form">
+          <div class="pass-row">
+            <input class="mini-input" placeholder="Full Name (as per ID)" id="p1Name" />
+            <input class="mini-input" placeholder="Age" type="number" id="p1Age" min="1" max="120" />
+            <select class="mini-input" id="p1Gender">
+              <option value="">Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px">
+          <button onclick="addPassenger()" style="background:rgba(255,255,255,0.07);border:1px dashed var(--glass-border);color:var(--muted);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;width:auto">+ Add Passenger</button>
+          <span style="font-size:12px;color:var(--muted)">Max 6 passengers</span>
+        </div>
+        <div class="form-group" style="margin-bottom:18px">
+          <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:block">Contact Number</label>
+          <input class="mini-input" type="tel" placeholder="+91 XXXXX XXXXX" id="bookingPhone" />
+        </div>
+        <button class="pay-btn" onclick="goStep2()">Continue to Review →</button>
+      </div>
+
+      <!-- Step 2: Payment -->
+      <div id="step-2-content" style="display:none">
+        <div class="fare-box">
+          <div class="fare-row"><span>Base Fare (1 passenger)</span><span id="baseFare">₹0</span></div>
+          <div class="fare-row"><span>Reservation Charges</span><span>₹40</span></div>
+          <div class="fare-row"><span>GST (5%)</span><span id="gstFare">₹0</span></div>
+          <div class="fare-row"><span>Catering (Optional)</span><span>₹0</span></div>
+          <div class="fare-row total"><span>Total Amount</span><span id="totalFare">₹0</span></div>
+        </div>
+        <div style="margin-bottom:18px">
+          <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Payment Method</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="social-btn" onclick="selectPayment(this)" style="cursor:pointer">💳 Debit/Credit Card</div>
+            <div class="social-btn" onclick="selectPayment(this)" style="cursor:pointer">📱 UPI</div>
+            <div class="social-btn" onclick="selectPayment(this)" style="cursor:pointer">🏦 Net Banking</div>
+            <div class="social-btn" onclick="selectPayment(this)" style="cursor:pointer">👛 Wallet</div>
+          </div>
+        </div>
+        <button class="pay-btn" onclick="processPayment()">🔒 Pay Securely →</button>
+      </div>
+
+      <!-- Step 3: Processing -->
+      <div id="step-3-content" style="display:none">
+        <div id="processingMsg" style="text-align:center;padding:20px">
+          <div style="font-size:40px;margin-bottom:14px">⏳</div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700">Processing Payment…</div>
+          <div style="color:var(--muted);font-size:14px;margin-top:8px">Please do not close this window</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticket Confirmed -->
+    <div class="ticket-success" id="ticketSuccess">
+      <div class="ticket-icon">🎫</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">Booking Confirmed!</div>
+      <div class="ticket-code" id="pnrCode">—</div>
+      <div style="color:var(--muted);font-size:14px;margin-bottom:6px">Your PNR Number</div>
+      <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:12px;padding:16px;margin:16px 0;font-size:14px;text-align:left">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Train</span><span id="confTrain">—</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">Date</span><span id="confDate">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Amount Paid</span><span style="color:var(--gold);font-weight:600" id="confAmount">—</span></div>
+      </div>
+      <button class="download-btn" onclick="showToast('E-ticket sent to your email!')">📥 Download E-Ticket</button>
+      <button class="pay-btn" style="margin-top:12px" onclick="closeModal();go('home')">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
+
+<!-- STATIONS AUTOCOMPLETE LIST -->
+<datalist id="stations">
+  <option value="New Delhi (NDLS)">
+  <option value="Mumbai Central (BCT)">
+  <option value="Mumbai CST (CSMT)">
+  <option value="Chennai Central (MAS)">
+  <option value="Kolkata Howrah (HWH)">
+  <option value="Bengaluru City (SBC)">
+  <option value="Hyderabad (HYB)">
+  <option value="Secunderabad (SC)">
+  <option value="Pune (PUNE)">
+  <option value="Ahmedabad (ADI)">
+  <option value="Jaipur (JP)">
+  <option value="Lucknow (LKO)">
+  <option value="Varanasi (BSB)">
+  <option value="Patna (PNBE)">
+  <option value="Bhopal (BPL)">
+  <option value="Nagpur (NGP)">
+  <option value="Visakhapatnam (VSKP)">
+  <option value="Kochi (ERS)">
+  <option value="Coimbatore (CBE)">
+  <option value="Guwahati (GHY)">
+</datalist>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 RailConnect India · Not affiliated with IRCTC</div>
+  <div>
+    <a href="#" onclick="showToast('Terms opened')">Terms</a>
+    <a href="#" onclick="showToast('Privacy policy opened')">Privacy</a>
+    <a href="#" onclick="go('help')">Support</a>
+    <a href="#" onclick="showToast('About us page coming soon')">About</a>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
